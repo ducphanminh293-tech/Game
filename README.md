@@ -8,6 +8,15 @@ A small, illustrated garden village you can explore on a PC. This is an interact
 
 ![Mira, Jasper and Rowan](docs/characters.png)
 
+## Play the first fruit puzzle
+
+Choose **Play → Play the demo**. Aim with the mouse and click to shoot. Match
+three or more fruit, collect 12 apples and 9 grapes, and stay within 18 shots.
+The stage includes wall bounces, falling disconnected fruit, win/loss, and retry.
+It is a handcrafted introductory stage; demo wins do not add village resources.
+
+![Playable fruit-shooting demo](docs/gameplay.png)
+
 ## Browser preview on GitHub Pages
 
 The configured site address is **https://ducphanminh293-tech.github.io/Game/**.
@@ -30,7 +39,7 @@ tools remain separate from the published site.
 
 Click buildings, residents, and the navigation buttons to explore. Drag the garden to pan, use the zoom controls to look closer, and close a window to return to the village. Use the language switch to change between English and Vietnamese; the selected language is remembered when browser storage is available.
 
-The preview includes building information, three sample residents, demo assignments and their illustrated benefits, storage, recruitment presentation, and the next stage's objectives and rewards. Production, actual recruitment, fruit-shooting gameplay, generated stages, and reward claims are not implemented. All quantities and assignment bonuses are illustrative, not final balance rules. The preview does not charge tickets or real money.
+The preview includes building information, three sample residents, demo assignments and their illustrated benefits, storage, recruitment presentation, and the next stage's objectives and rewards. One handcrafted fruit-shooting stage is playable: aim with the pointer, click or tap to shoot, match at least three, and collect 12 apples and 9 grapes within 18 shots. Retry as often as you like. Production, actual recruitment, generated stages, and permanent reward claims are not implemented. All quantities and assignment bonuses are illustrative, not final balance rules. The preview does not charge tickets or real money.
 
 Landscape phones are also supported; portrait screens show a rotate-device prompt. A desktop browser provides the intended PC review experience.
 
@@ -59,6 +68,7 @@ Source layout:
 - `src/styles.css`: layout, art presentation, responsive behavior, and reduced motion.
 - `src/app.js`: interaction and demo state.
 - `src/data.js`: sample resources, buildings, residents, and stage.
+- `src/puzzle.js` and `src/puzzle.css`: the handcrafted fruit-shooting demo and its interface.
 - `src/i18n.js`: English and Vietnamese interface copy.
 - `src/icons.js`: interface icons.
 - `assets/`: village and character artwork.
@@ -72,7 +82,7 @@ Tải `Fruit-Bloom-PC.html` về máy rồi mở bằng Chrome, Edge, Firefox ho
 
 Kéo khu vườn để di chuyển góc nhìn, dùng nút thu phóng và bấm vào công trình hoặc các nút điều hướng để khám phá. Giao diện mặc định là tiếng Anh; nút **VI / EN** cho phép đổi ngôn ngữ và ghi nhớ lựa chọn khi trình duyệt cho phép lưu dữ liệu.
 
-Đây là bản giao diện có tương tác để duyệt thiết kế. Bạn có thể thử phân công cư dân và xem lợi ích minh họa. Gameplay bắn trái cây, sản xuất theo thời gian, quay gacha thật và nhận thưởng chưa được triển khai. Các số liệu đều là dữ liệu demo.
+Đây là bản giao diện có tương tác để duyệt thiết kế. Bạn có thể thử phân công cư dân và xem lợi ích minh họa. Vào **Play → Play demo** để ngắm bằng chuột và bấm bắn; ghép ít nhất 3 trái cùng loại, thu đủ 12 táo và 9 nho trong 18 lượt. Có thể chơi lại. Sản xuất theo thời gian, sinh màn ngẫu nhiên, quay gacha thật và nhận thưởng thật chưa được triển khai. Các số liệu đều là dữ liệu demo.
 
 ## Validation
 
@@ -83,11 +93,16 @@ on them.
 ```sh
 python3 tests/smoke.py
 python3 tests/smoke.py --standalone dist/Fruit-Bloom-PC.html
+node tests/puzzle_model.cjs
+python3 tests/puzzle_smoke.py
 ```
 
 The standalone check blocks subresource requests and confirms artwork is embedded.
 The suite covers English defaults, language changes, demo assignment consistency,
 persistence, modal navigation, camera controls, and desktop/mobile layouts.
+Gameplay checks also cover a real pointer playthrough, both loss conditions,
+wall bounces, detached fruit, retry, keyboard controls and language switching
+during a shot.
 
 ## Design decisions still open
 

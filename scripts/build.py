@@ -138,16 +138,17 @@ Extract this ZIP, then double-click Fruit-Bloom-PC.html to open it in a desktop
 browser. No Internet connection, installation, or local server is needed.
 English is the default; use VI / EN to change language. Explore by clicking
 buildings and navigation buttons, dragging the garden, and using zoom controls.
-This is a UI prototype: assignment changes are demo state. Fruit-shooting,
-production, reward claims, and actual recruitment are not implemented.
+This prototype includes one playable fruit-shooting stage: Play > Play demo.
+Aim, click to shoot, and match at least three fruit. Assignments and stage results
+are demo state. Production, permanent rewards and recruitment are not implemented.
 
 FRUIT BLOOM — BẢN XEM TRƯỚC TRÊN PC
 
 Giải nén ZIP, rồi mở Fruit-Bloom-PC.html bằng trình duyệt trên máy tính.
 Không cần cài đặt hay kết nối mạng. Mặc định tiếng Anh; bấm VI / EN để đổi.
 Kéo khu vườn, dùng nút thu phóng và bấm công trình để khám phá.
-Đây là bản giao diện demo; chưa có gameplay bắn trái cây, sản xuất theo thời
-gian, nhận thưởng hoặc quay gacha thật.
+Bấm Play > Play demo để thử một màn bắn trái cây. Ngắm bằng chuột và bấm bắn,
+ghép ít nhất 3 trái cùng loại. Chưa có sản xuất, nhận thưởng hoặc quay gacha thật.
 """
     archive = DIST / "Fruit-Bloom-PC.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
