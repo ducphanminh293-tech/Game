@@ -1,0 +1,10 @@
+{
+  "name": "fruit-bloom",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An offline-capable, bilingual garden village prototype for PC review.",
+  "scripts": {
+    "dev": "python3 scripts/serve.py 4173",
+    "build": "python3 scripts/build.py"
+  }
+}

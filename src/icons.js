@@ -1,0 +1,38 @@
+window.FB = window.FB || {};
+(() => {
+  const paths = {
+    leaf: '<path d="M20 4C10 2 3 7 5 15c7 4 14-1 15-11Z"/><path d="m4 21 10-12M8 16l-1-5m5 1h5"/>',
+    play: '<path d="m9 5 11 7-11 7V5Z"/>',
+    build: '<path d="m4 21 9-9m0 0 3-3-5-5-3 3 5 5Zm3-3 3 3 3-3-3-3M3 5l3-3 4 4-3 3m8 7 5 5 2-2-5-5"/>',
+    people: '<circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 4 5v2"/>',
+    recruit: '<path d="m12 2 2.8 6.8L22 12l-7.2 3.2L12 22l-2.8-6.8L2 12l7.2-3.2L12 2Z"/><path d="m20 2 .7 1.3L22 4l-1.3.7L20 6l-.7-1.3L18 4l1.3-.7Z"/>',
+    storage: '<path d="m3 8 9-5 9 5v12H3V8Zm0 0 9 5 9-5M12 13v7M8 6l9 5"/>',
+    wood: '<path d="m5 20 14-9-4-7L2 13l3 7Z"/><ellipse cx="17" cy="7.5" rx="4" ry="4.5" transform="rotate(-32 17 7.5)"/><path d="m7 14 4-3m-4 6 6-4"/>',
+    stone: '<path d="m3 16 3-9 8-4 7 7-2 10H8l-5-4Z"/><path d="m6 7 6 5 9-2M12 12 8 20m4-8 7 8"/>',
+    fruit: '<path d="M12 8C3 1 0 15 8 21c2 1 3-1 4-1s2 2 4 1C24 15 21 1 12 8Z"/><path d="M12 8V5m0 0c0-4 5-4 6-3-1 3-4 4-6 3M7 11c-2 2-1 5 0 6"/>',
+    apple: '<path d="M12 8C3 1 0 15 8 21c2 1 3-1 4-1s2 2 4 1C24 15 21 1 12 8Z"/><path d="M12 8V4m0 1c2-4 5-4 6-3-1 3-4 4-6 3"/>',
+    grape: '<circle cx="8" cy="9" r="3"/><circle cx="15" cy="9" r="3"/><circle cx="6" cy="14" r="3"/><circle cx="12" cy="14" r="3"/><circle cx="18" cy="14" r="3"/><circle cx="9" cy="19" r="3"/><circle cx="15" cy="19" r="3"/><path d="M12 6V2m0 1 5-1"/>',
+    ticket: '<path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Z"/><path d="M15 6v2m0 3v2m0 3v2m-8-7 2-2 2 2-2 2-2-2Z"/>',
+    settings: '<path d="m10 3-1 3-3 1-2-1-2 4 2 2v3l-1 2 3 3 3-1 3 1 1 2 4-1 1-3 2-2 2-1-1-4-3-1-2-2V3h-6Z"/><circle cx="12" cy="12" r="3"/>',
+    close: '<path d="m6 6 12 12M18 6 6 18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    center: '<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><circle cx="12" cy="12" r="3"/>',
+    arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
+    back: '<path d="M20 12H5m6-6-6 6 6 6"/>',
+    lock: '<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/>',
+    check: '<path d="m5 12 4 4L20 5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.2"/>',
+    sound: '<path d="m3 9 4 0 5-5v16l-5-5H3V9Zm13-2a8 8 0 0 1 0 10m3-13a12 12 0 0 1 0 16"/>',
+    mute: '<path d="m3 9 4 0 5-5v16l-5-5H3V9Zm13 0 6 6m0-6-6 6"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 1v2m0 18v2M1 12h2m18 0h2M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/>',
+    home: '<path d="m2 11 10-8 10 8M5 9v12h14V9M9 21v-7h6v7"/>',
+    pot: '<path d="M4 10h16v5a7 7 0 0 1-7 7h-2a7 7 0 0 1-7-7v-5Zm0 3H1m19 0h3M8 2c-2 2 2 3 0 5m5-5c-2 2 2 3 0 5m5-5c-2 2 2 3 0 5"/>',
+    hammer: '<path d="m5 22 10-12m-5-5 5-4 7 6-4 5-8-7Z"/>',
+    rotate: '<rect x="7" y="5" width="10" height="16" rx="2" transform="rotate(-35 12 13)"/><path d="M3 6A10 10 0 0 1 19 3m0-3v4h-4"/>',
+    mouse: '<rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v7"/>',
+    flag: '<path d="M5 22V3m0 1c5-5 9 5 15 0v10c-6 5-10-5-15 0"/>',
+    heart: '<path d="M12 21 3 12C-2 5 7 0 12 7c5-7 14-2 9 5l-9 9Z"/>',
+  };
+  FB.icon = (name, className = '') => `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.leaf}</svg>`;
+})();
