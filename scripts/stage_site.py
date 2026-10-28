@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_ENTRIES = ("index.html", "src", "assets", ".nojekyll")
+PUBLIC_ENTRIES = ("index.html", "src", "assets/fonts", ".nojekyll")
 
 
 def main():
@@ -51,6 +51,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     for name in PUBLIC_ENTRIES:
         source = ROOT / name
+        (output / name).parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
             shutil.copytree(source, output / name)
         else:

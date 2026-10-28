@@ -1,195 +1,176 @@
 # Fruit Bloom
 
-A small, illustrated garden village you can explore on a PC. This is an interactive **web prototype**, with English as the default language and a complete Vietnamese option.
+A playable garden village with a connected **harvest → match-3 → build** loop.
+Start in Willowbrook, gather your first crops, win materials from fruit puzzles,
+and use them to grow and decorate the same village. English is the default;
+Vietnamese can be selected at any time.
 
-## Current revision
+## Play on PC
 
-Vietnamese UI now uses bundled Noto Sans and Noto Serif fonts, including the
-standalone export. Download the latest repository ZIP to get this fix.
+1. Download [Fruit-Bloom-PC.zip](https://github.com/ducphanminh293-tech/Game/raw/refs/heads/main/downloads/Fruit-Bloom-PC.zip).
+2. Extract the ZIP, then double-click **Fruit-Bloom-PC.html**. No installation,
+   server, or internet connection is required.
+3. Use **VI / EN** to change language. Progress saves in this browser when storage
+   is available; keep using the same file location and browser for your saved village.
 
-This revision adds a playable swap-based match-3 level and a separate
-**Village studio** for placing and moving individual objects. The main village
-still uses the original illustrated scene; the studio tests the new layout
-system with simple vector artwork.
+For source code, download the [repository ZIP](https://github.com/ducphanminh293-tech/Game/archive/refs/heads/main.zip),
+extract it fully and open `index.html`. Previously downloaded copies do not update
+automatically. `downloads/` contains the current playable release; `dist/` is generated locally.
 
-[Read the design direction (Vietnamese)](docs/design-direction-v2.vi.md) and
-[compare the two art directions](docs/modular-art-study.png). The comparison is
-concept artwork, not a screenshot of the modular prototype.
+![The rebuilt Willowbrook village](docs/village.png)
 
-## Preview the artwork
+## Your first few minutes
 
-![Fruit Bloom village](docs/village.png)
+- **Harvest:** click a basket above a ripe rice paddy or apple tree. Crops grow
+  again automatically. Rice and fruit both contribute to the **Harvest** resource.
+- **Play:** open the next match-3 level directly from the main dock. Swap two
+  neighboring fruits to make a row or column of three or more. Complete both
+  collection goals before your moves run out to receive village materials.
+- **Build:** choose a crop, workshop or decoration, then click a clear tile on
+  the main map. The displayed cost is deducted when placement succeeds.
+- **Orders:** deliver the requested harvest and materials for coins and supplies.
+- **Improve:** select an item in the village to see production, upgrade it,
+  move it for free, or remove it for half its base building cost. The cottage
+  can be moved and upgraded but cannot be removed.
 
-![Mira, Jasper and Rowan](docs/characters.png)
+The opening tasks guide you through three harvests, your first puzzle win and
+building a workshop. Later tasks lead to orders, more puzzles and a cottage upgrade.
 
-## Play match-3
+Drag the landscape to pan. Use the wheel or camera buttons to zoom. Press Escape
+to cancel placement or close the open panel. Sound effects and reduced motion
+can be changed in Settings. Landscape phones are supported; portrait screens
+show a rotation prompt.
 
-Choose **Play → Play match-3**. Drag between two neighboring tiles, or click them
-in sequence, to form a row or column of at least three matching fruit. Collect
-**12 apples and 9 grapes within 18 moves** on the 6×6 board. Invalid swaps return
-the tiles without spending a move; cleared tiles fall and refill to allow
-cascades. Use **Show a match** for a hint. If no legal move remains, the board
-reshuffles automatically. Win, lose, and retry are supported.
+## Match-3 and progression
 
-Keyboard: use the arrow keys to navigate the board, then Space or Enter to
-select the two neighboring tiles. This is one demo level; wins do not add
-village resources.
+The first level has a 6×6 board, 18 moves, and goals of 12 apples and 9 grapes.
+Drag a fruit toward its neighbor, or click the two tiles in sequence. Invalid
+swaps return without spending a move. Gravity, refill and chain matches follow
+each successful swap, and the board reshuffles if it has no legal move.
 
-![Playable swap match-3 demo](docs/gameplay.png)
+Use the hint button when needed. Keyboard controls use arrows to navigate and
+Space or Enter to select the two neighboring tiles. Winning grants the shown
+coins, wood, stone and harvest once, then opens the next level. Losing allows a
+retry. Eight stage configurations vary the goals and move budgets; later levels
+reuse those configurations with different seeds.
 
-## Build and decorate
+![Connected match-3 gameplay](docs/gameplay.png)
 
-Choose **Build → Village studio**. Select a rice paddy, apple tree, stone path,
-lamp, wildflowers, cypress, cottage, or workbench, then click a clear tile. The
-11×11 isometric grid previews placement and prevents overlaps or placement
-outside the meadow. Select a placed item to move or remove it; **Undo** reverses
-the last change.
+## A village you can change
 
-Select a rice paddy or apple tree and use **Change growth** to compare growing
-and harvest-ready art. This changes a preview state, not a production timer.
-The layout is saved in this browser when storage is available and survives
-language changes. Keyboard placement uses arrow keys and Enter; Esc cancels.
+The main scene is a 12×12 isometric grid with separate shaded SVG objects:
+ripe and growing rice, apple trees, a cottage, workshop, paths, lanterns,
+flowers, cypresses and a fountain. Placement checks the entire footprint and
+prevents overlap or building beyond the village boundary.
 
-The farmer and vegetation have small, separate animations that respect reduced
-motion. These demonstrate movement; NPC pathfinding, work routines, production,
-and rewards are future work. The studio's simple original SVG art tests
-readability and placement. The AI art comparison is a separate visual study,
-not artwork already implemented in this grid.
+At level 1, rice grows in 25 seconds, apple trees in 40 seconds and workshops
+produce building materials in 45 seconds. Upgrades shorten the cycle and
+increase its yield. Timers continue while the game is closed, up to the next
+ready collection; resources are granted when you collect them.
 
-![Modular village decorating prototype](docs/village-studio.png)
+Crops, water, leaves and the gardener have separate animations. These are scene
+animations; there is no resident assignment or autonomous worker simulation in
+this version. All buildings, resources, upgrades, orders and completed levels
+save locally in the browser. If storage is unavailable, play continues for the
+current visit. There is no account, cloud sync, gacha or real-money shop.
 
-![Vietnamese typography with bundled fonts](docs/vietnamese-font-fix.png)
+![Building directly in the village](docs/building.png)
 
-## Browser preview on GitHub Pages
+![Harvesting and production](docs/harvest.png)
 
-The configured site address is **https://ducphanminh293-tech.github.io/Game/**.
-It becomes available after Pages is enabled and the deployment workflow succeeds.
+This is a coherent playable slice of the game. Balancing, special puzzle pieces,
+obstacles, a larger campaign and more character activities remain future work.
+The earlier [design discussion](docs/design-direction-v2.vi.md) and
+[art comparison](docs/modular-art-study.png) record the exploration before this
+revision; they are not screenshots of the current game.
 
-For this repository, select **Settings → Pages → Build and deployment → Source:
+## Chơi thử trên PC
+
+Tải [Fruit-Bloom-PC.zip](https://github.com/ducphanminh293-tech/Game/raw/refs/heads/main/downloads/Fruit-Bloom-PC.zip),
+giải nén rồi mở **Fruit-Bloom-PC.html**. Không cần cài đặt, mở máy chủ hay kết nối
+mạng. Hình vẽ, mã game và font tiếng Việt đã được nhúng vào một file.
+Dùng cùng trình duyệt và giữ nguyên vị trí file để tiếp tục làng đã lưu.
+Bản đã tải về không tự cập nhật; tải ZIP mới khi có bản nâng cấp.
+
+Bản này nối các phần thành một vòng chơi trên cùng ngôi làng:
+
+1. Bấm giỏ trên ruộng chín hoặc cây táo để **thu hoạch**. Lúa và trái cây đều
+   tạo tài nguyên **Nông sản**; cây trồng tự lớn lại sau khi thu.
+2. Bấm **Chơi** để vào màn ghép 3. Kéo hoặc bấm hai trái liền kề để đổi chỗ.
+   Thu đủ mục tiêu trong số lượt cho phép để nhận vật liệu và mở màn tiếp theo.
+3. Bấm **Xây dựng**, chọn ruộng, cây, xưởng hoặc đồ trang trí rồi đặt vào ô trống
+   ngay trên bản đồ. Chi phí chỉ bị trừ khi đặt thành công.
+4. Mở **Đơn hàng** để đổi nông sản lấy xu và vật liệu. Chọn vật đã đặt để nâng
+   cấp, di chuyển hoặc dỡ bỏ; dỡ bỏ hoàn lại nửa chi phí xây ban đầu.
+
+Lúa xanh chuyển sang lúa vàng, cây táo có trạng thái đang lớn và có quả; xưởng
+làm ra gỗ và đá. Có âm thanh, chuyển động cảnh, tiến trình nhiệm vụ và lưu game
+trên trình duyệt. Mặc định là tiếng Anh; dùng **VI / EN** để đổi ngôn ngữ. Font
+hỗ trợ tiếng Việt đầy đủ được đóng gói cùng game, không cần tải từ mạng.
+
+Thời gian cây trồng tiếp tục đến lần thu hoạch kế tiếp khi bạn rời game, nhưng
+phải bấm thu hoạch để nhận tài nguyên. Cư dân hiện có chuyển động trong cảnh;
+hệ thống tự đi làm việc, đồng bộ tài khoản và nền kinh tế thương mại chưa nằm
+trong bản này.
+
+## GitHub Pages
+
+The configured address is **https://ducphanminh293-tech.github.io/Game/**. It
+becomes available after Pages is enabled and the deployment workflow succeeds.
+
+In the repository, select **Settings → Pages → Build and deployment → Source:
 GitHub Actions**. Then run **Actions → Publish Fruit Bloom to GitHub Pages → Run
-workflow** if the initial deployment has not completed. Later pushes to `main`
-deploy automatically. No API keys or server are required for the game.
+workflow** if the first deployment has not completed. Later pushes to `main`
+deploy automatically. The current GitHub connection cannot enable Pages for the
+repository, so that setting must be selected by its owner.
 
-The workflow stages only `index.html`, `src/`, `assets/` and `.nojekyll` using
-`python3 scripts/stage_site.py`. Source files, generated PC downloads and test
-tools remain separate from the published site.
-
-## Open the PC preview
-
-1. Download the [latest source ZIP](https://github.com/ducphanminh293-tech/Game/archive/refs/heads/main.zip).
-2. Extract the entire ZIP, then open `index.html` in Chrome, Edge, Firefox, or Safari. Keep `src/` and `assets/` beside it.
-3. If you have an exported `Fruit-Bloom-PC.html`, open that file directly. The export includes its artwork and fonts and works offline.
-
-The generated `dist/` folder is not committed to GitHub. To create the single-file
-export from the source ZIP, run the build command below. Previously downloaded
-copies do not update automatically; download the source ZIP again after an update.
-
-Click buildings, residents, and the navigation buttons to explore. Drag the garden to pan, use the zoom controls to look closer, and close a window to return to the village. Use the language switch to change between English and Vietnamese; the selected language is remembered when browser storage is available.
-
-The preview includes building information, three sample residents, demo assignments and their illustrated benefits, storage, recruitment presentation, and stage objectives. The match-3 level and modular Village studio are playable. Production, actual recruitment, a level campaign, and permanent reward claims are not implemented. All quantities and assignment bonuses are illustrative, not final balance rules. The preview does not charge tickets or real money.
-
-Landscape phones are also supported; portrait screens show a rotate-device prompt. A desktop browser provides the intended PC review experience.
+`python3 scripts/stage_site.py` stages the page, scripts, styles and local font files. Historical concept PNGs and development tools are excluded
+from the published site.
 
 ## Development
 
-Python 3 is the only required development runtime. Node/npm is optional and provides convenient command aliases.
+Python 3 is the only required development runtime. Node/npm is optional for
+command aliases and model tests. No package installation is needed to run the game.
 
 ```sh
-cd /workspace/Game
 python3 scripts/serve.py 4173
-```
-
-The development server listens on the machine's loopback interface. This address is for local development and automated validation; the downloadable HTML is the portable user preview.
-
-Build the portable preview after changing the source:
-
-```sh
 python3 scripts/build.py
 ```
 
-Equivalent commands are `npm run dev` and `npm run build`. No package installation is required.
+The server listens on loopback for local development. The builder writes
+`dist/Fruit-Bloom-PC.html` and `dist/Fruit-Bloom-PC.zip`. Rebuild after source
+changes; running the server does not refresh the exported files. Equivalent
+commands are `npm run dev` and `npm run build`.
 
-Source layout:
+Before a release, run `python3 scripts/build.py --release` to refresh the committed
+`downloads/Fruit-Bloom-PC.zip` as well.
 
-- `index.html`: page shell and script order.
-- `src/styles.css`: layout, art presentation, responsive behavior, and reduced motion.
-- `src/app.js`: interaction and demo state.
-- `src/data.js`: sample resources, buildings, residents, and stage.
-- `src/puzzle.js` and `src/puzzle.css`: fruit puzzle rules and interface.
-- `src/village.js` and `src/village.css`: modular Village studio and original SVG objects.
-- `src/typography.css` and `assets/fonts/`: bundled Vietnamese-capable fonts and SIL Open Font License notices.
-- `src/i18n.js`: English and Vietnamese interface copy.
-- `src/icons.js`: interface icons.
-- `assets/`: village and character artwork.
-- `scripts/build.py`: embeds scripts, styles, and artwork in a self-contained HTML file and ZIP.
+Active source modules:
 
-The builder writes `dist/Fruit-Bloom-PC.html` and `dist/Fruit-Bloom-PC.zip`. Rebuild before sharing; running the source server does not refresh exported artifacts.
-
-## Mở bản xem trước trên PC
-
-Tải [ZIP mã nguồn mới nhất](https://github.com/ducphanminh293-tech/Game/archive/refs/heads/main.zip),
-giải nén toàn bộ rồi mở `index.html` bằng Chrome, Edge, Firefox hoặc Safari. Giữ
-nguyên thư mục `src/` và `assets/`. Bản đã tải về không tự cập nhật.
-
-Nếu có bản xuất `Fruit-Bloom-PC.html`, chỉ cần mở file đó; font và hình ảnh đã
-được nhúng, không cần mạng. Thư mục `dist/` không nằm trên GitHub; lệnh build ở
-trên tạo bản HTML và ZIP này.
-
-Kéo khu vườn để di chuyển góc nhìn, dùng nút thu phóng và bấm vào công trình hoặc các nút điều hướng để khám phá. Giao diện mặc định là tiếng Anh; nút **VI / EN** cho phép đổi ngôn ngữ và ghi nhớ lựa chọn khi trình duyệt cho phép lưu dữ liệu.
-
-Vào **Chơi → Chơi ghép 3** để thử bàn 6×6: kéo hoặc bấm hai ô liền nhau, ghép
-từ ba trái theo hàng ngang/dọc và thu đủ **12 táo, 9 nho trong 18 lượt**. Đổi
-không tạo nhóm không mất lượt. Có trái rơi, chuỗi ghép, gợi ý, thắng/thua và chơi
-lại; bảng tự xáo khi hết nước hợp lệ.
-
-Vào **Xây dựng → Xưởng thiết kế làng** để đặt ruộng lúa, cây táo, đường đá, đèn,
-hoa, cây bách, nhà nhỏ hoặc bàn làm việc. Chọn vật đã đặt để di chuyển/dỡ bỏ;
-có hoàn tác và lưu bố cục trên trình duyệt. Chọn ruộng hoặc cây rồi bấm **Đổi
-giai đoạn** để xem trạng thái đang lớn và sẵn sàng thu hoạch. Đây là thao tác
-xem trước, chưa có thời gian sản xuất thật.
-
-Xưởng dùng đồ họa vector đơn giản để thử cách bố trí. Nhân vật và cây có chuyển
-động minh họa riêng; chưa có AI tìm đường hoặc làm việc tự động. Cảnh làng chính
-vẫn giữ hình cũ. Ảnh nghiên cứu mỹ thuật trong tài liệu là hướng tham khảo riêng,
-không phải đồ họa đã được đưa vào xưởng.
-
-Bạn vẫn có thể thử phân công cư dân và xem lợi ích minh họa trong làng hiện tại.
-Sản xuất theo thời gian, chuỗi màn chơi, quay gacha thật và nhận thưởng thật chưa
-được triển khai. Các số liệu đều là dữ liệu demo.
+- `src/app.js`, `src/styles.css`: unified village interface and navigation.
+- `src/game-state.js`: inventory, production, construction, orders, levels and saves.
+- `src/world.js`, `src/world.css`: map rendering, camera, placement and interaction.
+- `src/world-art.js`: original modular SVG artwork and animation parts.
+- `src/puzzle.js`, `src/puzzle.css`: match-3 model, effects, goals and reward callbacks.
+- `src/ui-copy.js`, `src/i18n.js`: English and Vietnamese text.
+- `src/typography.css`, `assets/fonts/`: bundled fonts and SIL Open Font License notices.
+- `scripts/build.py`: portable HTML/ZIP export. The scene, characters and fruit are SVG source; the export includes the local fonts.
 
 ## Validation
 
-The browser smoke suite uses Python Playwright and Chromium from the development
-machine. They are testing tools only; the exported game has no runtime dependency
-on them.
+Model tests use Node. Browser checks use Python Playwright and Chromium from the
+development environment; the exported game does not depend on those tools.
 
 ```sh
-python3 tests/smoke.py
-python3 tests/smoke.py --standalone dist/Fruit-Bloom-PC.html
+node tests/game_state.cjs
 node tests/puzzle_model.cjs
-python3 tests/puzzle_smoke.py
-python3 tests/puzzle_smoke.py --standalone dist/Fruit-Bloom-PC.html
-python3 tests/village_smoke.py
-python3 tests/village_smoke.py --standalone dist/Fruit-Bloom-PC.html
+python3 tests/playthrough.py
+python3 tests/playthrough.py --standalone dist/Fruit-Bloom-PC.html
 python3 tests/typography.py
 python3 tests/typography.py --standalone dist/Fruit-Bloom-PC.html
 ```
 
-The standalone check blocks subresource requests and confirms artwork is embedded.
-The suite covers English defaults, language changes, demo assignment consistency,
-persistence, modal navigation, camera controls, and desktop/mobile layouts.
-Match-3 checks cover valid/invalid swaps, cascades, goals, win/loss, playable
-boards, real pointer input, keyboard controls, retry, and language changes.
-Village studio checks cover placement, collision, moving, removal, undo,
-growth previews, persistence, and layout. Typography checks cover Vietnamese
-glyphs, Unicode normalization, and actual browser font use in both source and
-standalone builds.
-
-## Design decisions still open
-
-- Construction and upgrade costs, production rules, and expansion progression.
-- Recruit rarities, odds, ticket cost, pity rules, duplicate handling, and progression.
-- Match-3 balancing, special pieces, obstacles, and level progression.
-- Modular village production, NPC work routines, and final asset animation.
-
-The prototype does not lock these decisions in. Sample values live in `src/data.js`.
+Checks cover connected gameplay, local saving, resource transactions, production
+readiness, placement boundaries, reward idempotence, match-3 rules and actual
+browser interaction. The offline check blocks external subresources. Typography
+checks inspect the browser's actual font use for Vietnamese text.

@@ -1,8 +1,8 @@
 {
   "name": "fruit-bloom",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "An offline-capable, bilingual garden village prototype for PC review.",
+  "description": "A bilingual farm and match-3 game with an offline playable village.",
   "scripts": {
     "dev": "python3 scripts/serve.py 4173",
     "build": "python3 scripts/build.py"

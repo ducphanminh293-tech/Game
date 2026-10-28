@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 """Export Fruit Bloom as a portable HTML document and a download ZIP."""
 
+import argparse
 import base64
 from html import unescape
 import json
 import mimetypes
 from pathlib import Path
 import re
+import shutil
 from urllib.parse import urlsplit
 import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-IMAGE_EXTENSIONS = {".png", ".webp", ".jpg", ".jpeg", ".svg", ".gif", ".avif"}
-REQUIRED_ASSETS = (
-    "garden.png", "hall.png", "orchard.png", "kitchen.png", "workshop.png",
-    "mira.png", "jasper.png", "rowan.png",
-)
+# Scene and puzzle artwork are generated from the inline SVG source modules.
+# Keep this explicit list limited to images actually used by the active game;
+# historical concept PNGs stay in the repository but are not shipped in exports.
+REQUIRED_ASSETS = ()
 ATTR = re.compile(r'''([\w-]+)\s*=\s*(["'])(.*?)\2''', re.DOTALL)
 
 
@@ -112,13 +113,7 @@ def bundle_html():
     # dynamic <img> strings that the application resolves through FB_ASSETS.
     html = re.sub(r"(<script\b[^>]*>)(.*?)</script\s*>", replace_script, html,
                   flags=re.IGNORECASE | re.DOTALL)
-    assets = {}
-    for path in sorted((ROOT / "assets").rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in IMAGE_EXTENSIONS:
-            continue
-        if path.name.lower().startswith(("style", "reference")):
-            continue
-        assets[path.relative_to(ROOT / "assets").as_posix()] = data_uri(path)
+    assets = {name: data_uri(ROOT / "assets" / name) for name in REQUIRED_ASSETS}
     encoded = json.dumps(assets, ensure_ascii=True, separators=(",", ":")).replace("</", "<\\/")
     injection = f"<script>window.FB_ASSETS={encoded};</script>\n"
     html = html.replace("</head>", injection + "</head>", 1)
@@ -128,31 +123,49 @@ def bundle_html():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--release", action="store_true", help="Also refresh the GitHub PC download in downloads/")
+    args = parser.parse_args()
     html, asset_count = bundle_html()
     DIST.mkdir(parents=True, exist_ok=True)
     output = DIST / "Fruit-Bloom-PC.html"
     output.write_text(html, encoding="utf-8")
-    instructions = """FRUIT BLOOM — PC PREVIEW
+    instructions = """FRUIT BLOOM — PLAYABLE PC EDITION
 
 Extract this ZIP, then double-click Fruit-Bloom-PC.html to open it in a desktop
 browser. No Internet connection, installation, or local server is needed.
-English is the default; use VI / EN to change language. Explore by clicking
-buildings and navigation buttons, dragging the garden, and using zoom controls.
-This prototype includes one playable match-3 stage: Play > Play match-3.
-Drag adjacent fruit, or click two neighbours, to match 3 in a row or column.
-Open Build > Village studio to place crops, trees, paths and lamps. Layouts save
-on this browser. Assignments and stage results
-are demo state. Production, permanent rewards and recruitment are not implemented.
+English is the default; use VI / EN to change language.
+
+1. Click a basket above ripe rice or an apple tree to collect your first harvest.
+2. Choose Play. Drag adjacent fruit, or click two neighbours, to match 3 in a
+   row or column. Completing the goals earns materials and opens the next level.
+3. Choose Build, select an item, then click a clear tile in your village.
+   Construction spends the displayed materials. Select an item to move or upgrade it.
+4. Choose Orders to trade your harvest for coins and building materials.
+
+Drag the landscape to pan; use the mouse wheel or zoom buttons to look closer.
+Production continues to its next ready harvest while you are away. Village,
+resources and completed levels save in this browser when storage is available.
+The exported HTML contains all artwork and Vietnamese fonts. Progress is local
+to the browser; there is no account, cloud synchronization or real-money shop.
 
 FRUIT BLOOM — BẢN XEM TRƯỚC TRÊN PC
 
 Giải nén ZIP, rồi mở Fruit-Bloom-PC.html bằng trình duyệt trên máy tính.
 Không cần cài đặt hay kết nối mạng. Mặc định tiếng Anh; bấm VI / EN để đổi.
 Kéo khu vườn, dùng nút thu phóng và bấm công trình để khám phá.
-Bấm Play > Play match-3 để thử màn ghép 3. Kéo hai trái liền kề để đổi chỗ,
-hoặc bấm lần lượt hai trái; ghép từ 3 trái theo hàng ngang hoặc dọc.
-Vào Xây dựng > Xưởng thiết kế làng để đặt ruộng, cây, đường và đèn. Bố cục lưu
-trong trình duyệt. Chưa có sản xuất, nhận thưởng hoặc quay gacha thật.
+
+1. Bấm giỏ phía trên ruộng chín hoặc cây táo để thu hoạch.
+2. Bấm Chơi. Kéo hoặc bấm hai trái liền kề để đổi chỗ, ghép từ 3 trái theo
+   hàng ngang hoặc dọc. Thắng màn để nhận vật liệu và mở màn tiếp theo.
+3. Bấm Xây dựng, chọn vật dụng rồi bấm ô trống trong làng. Xây dựng tiêu hao
+   vật liệu được hiển thị. Chọn vật đã đặt để di chuyển hoặc nâng cấp.
+4. Bấm Đơn hàng để đổi nông sản lấy xu và vật liệu.
+
+Cây trồng tiếp tục lớn đến lần thu hoạch tiếp theo khi bạn rời game.
+Làng, tài nguyên và tiến trình màn chơi được lưu trong trình duyệt nếu cho phép.
+Bản HTML chứa sẵn hình ảnh và font tiếng Việt. Tiến trình lưu trên máy này;
+chưa có tài khoản, đồng bộ đám mây hoặc cửa hàng dùng tiền thật.
 """
     archive = DIST / "Fruit-Bloom-PC.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
@@ -162,6 +175,11 @@ trong trình duyệt. Chưa có sản xuất, nhận thưởng hoặc quay gacha
             bundle.writestr(info, body.encode("utf-8"))
     print(f"Built {output.name}: {output.stat().st_size:,} bytes; {asset_count} embedded artwork assets")
     print(f"Built {archive.name}: {archive.stat().st_size:,} bytes")
+    if args.release:
+        destination = ROOT / "downloads"
+        destination.mkdir(exist_ok=True)
+        shutil.copy2(archive, destination / archive.name)
+        print(f"Refreshed downloads/{archive.name}")
 
 
 if __name__ == "__main__":

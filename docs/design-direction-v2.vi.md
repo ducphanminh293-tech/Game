@@ -1,5 +1,8 @@
 # Fruit Bloom: điều chỉnh hướng thiết kế
 
+> Tài liệu lưu lại giai đoạn trước bản 0.4. Ngôi làng mới hiện đã nối thu hoạch,
+> ghép 3, xây dựng và đơn hàng. Xem [README hiện tại](../README.md) để chơi bản mới.
+
 Tài liệu này ghi lại đánh giá sau khi xem bản prototype và phản hồi của chủ dự án.
 Font tiếng Việt đã được sửa trong mã nguồn. Chủ dự án đã chọn chuyển phần giải
 đố sang đổi chỗ ghép 3. Màn chơi mới và xưởng thiết kế làng riêng đã có thể chơi

@@ -94,3 +94,23 @@ for (let seed=0; seed<100; seed++) {
 }
 assert.ok(reshuffles > 0, 'Seed exercise did not cover automatic dead-board recovery');
 console.log(`PASS Dead starting board recovery and 3,000 seeded moves (${reshuffles} automatic reshuffles)`);
+
+// Real move sequences keep every opening campaign template demonstrably solvable.
+require('../src/game-state.js');
+const campaignSolutions = [
+  [[15,21],[13,19],[0,6],[14,20],[18,24]],
+  [[14,15],[27,33],[4,5],[20,21]],
+  [[8,9],[13,14],[3,4],[15,21],[13,14],[21,22],[16,17],[12,13],[12,13],[14,20]],
+  [[15,16],[32,33],[30,31],[30,31],[22,23],[15,16],[3,9],[6,12],[19,20],[13,19],[20,26],[9,10]],
+  [[22,23],[7,13],[14,20],[25,26],[14,15],[26,27],[26,32],[12,13],[14,15],[18,24],[14,20]],
+  [[14,15],[25,31],[21,22],[26,32],[8,9],[19,20],[17,23],[1,2],[4,10],[3,4],[13,14],[8,9],[9,15]],
+  [[32,33],[15,16],[19,25],[14,15],[8,14],[15,16],[30,31],[22,23],[22,28],[4,5],[8,14]],
+  [[21,27],[15,21],[16,22],[4,10],[27,33],[0,1],[3,9],[1,7],[16,22],[20,21],[4,10],[16,22]],
+];
+campaignSolutions.forEach((sequence,index)=>{
+  const config=FB.game.stage(index+1), level=create(config);
+  for(const move of sequence)assert.equal(level.swap(...move)?.valid,true);
+  assert.equal(level.snapshot().status,'won',`Campaign level ${index+1} must be solvable`);
+  assert.ok(level.snapshot().movesUsed<=config.moves);
+});
+console.log('PASS All eight opening campaign levels can be won within their move budgets');

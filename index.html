@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#193f35">
-  <meta name="description" content="Fruit Bloom — a little garden, a world of possibilities. An interactive village prototype.">
-  <title>Fruit Bloom — Your little garden</title>
+  <meta name="theme-color" content="#4b8d71">
+  <meta name="description" content="Grow a little garden, play fruit puzzles, and build a village of your own. Fruit Bloom is playable offline in English and Vietnamese.">
+  <title>Fruit Bloom · Willowbrook</title>
   <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/world.css">
   <link rel="stylesheet" href="src/puzzle.css">
-  <link rel="stylesheet" href="src/village.css">
   <link rel="stylesheet" href="src/typography.css">
 </head>
 <body>
   <main id="game" aria-label="Fruit Bloom">
-    <div class="ambient-sky" aria-hidden="true"></div>
-    <div id="viewport" class="viewport"><div id="world" class="world"></div></div>
-    <div class="vignette" aria-hidden="true"></div>
+    <div id="world-mount"></div>
     <header id="hud" class="hud"></header>
-    <section id="village-heading" class="village-heading"></section>
-    <aside id="garden-note" class="garden-note"></aside>
+    <aside id="quest-panel" class="quest-panel"></aside>
+    <aside id="side-panel" class="side-panel"></aside>
+    <div id="mode-hint" class="mode-hint"></div>
+    <nav id="dock" class="dock" aria-label="Village activities"></nav>
     <div id="camera-controls" class="camera-controls"></div>
-    <div id="scene-caption" class="scene-caption"></div>
-    <nav id="navigation" class="navigation" aria-label="Main navigation"></nav>
-    <div id="demo-badge" class="demo-badge"></div>
+    <div id="save-status" class="save-status"></div>
     <div id="modal-root"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <div id="portrait-prompt" class="portrait-prompt"></div>
+    <div id="portrait-message" class="portrait-message"></div>
   </main>
-  <script src="src/data.js"></script>
   <script src="src/i18n.js"></script>
+  <script src="src/ui-copy.js"></script>
   <script src="src/icons.js"></script>
+  <script src="src/game-state.js"></script>
+  <script src="src/world-art.js"></script>
+  <script src="src/world.js"></script>
   <script src="src/puzzle.js"></script>
-  <script src="src/village.js"></script>
   <script src="src/app.js"></script>
 </body>
 </html>
