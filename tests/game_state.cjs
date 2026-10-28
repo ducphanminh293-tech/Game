@@ -1,0 +1,142 @@
+/* Pure state tests: no browser, timers or network required. */
+const assert = require('node:assert/strict');
+global.window = {FB:{}};
+global.FB = window.FB;
+require('../src/game-state.js');
+const create = FB.createGame;
+const KEY = 'fruit-bloom-save-v3';
+class MemoryStorage {
+  constructor(){this.values=new Map();}
+  getItem(key){return this.values.get(key)??null;}
+  setItem(key,value){this.values.set(key,String(value));}
+}
+let clock=100000;
+const storage=new MemoryStorage();
+const game=create(storage,()=>clock);
+assert.equal(game.getState().language,'en');
+assert.deepEqual(game.getState().inventory,{coins:250,wood:100,stone:60,fruit:0});
+assert.equal(game.getState().items.length,17);
+assert.equal(game.getState().storageAvailable,true);
+const snapshot=game.getState();snapshot.inventory.coins=99999;snapshot.items[0].x=10;
+assert.equal(game.getState().inventory.coins,250);
+assert.equal(game.getState().items[0].x,2);
+
+let notices=0;
+const unsubscribe=game.subscribe(state=>{notices++;assert.equal(state.version,3);});
+const before=game.getState();
+for(const [type,x,y,reason] of [['rice',2,1,'occupied'],['rice',11,11,'outside'],['path',-1,1,'outside'],['constructor',5,5,'unknownType']]) {
+  assert.equal(game.place(type,x,y).reason,reason);
+  assert.deepEqual(game.getState(),before,'Rejected placement changed save');
+}
+assert.equal(notices,0);
+const build=game.place('workshop',6,5);
+assert.equal(build.ok,true);
+assert.deepEqual(game.getState().inventory,{coins:130,wood:55,stone:40,fruit:0});
+assert.equal(build.item.readyAt,clock+45000);
+assert.equal(game.getState().builds,1);
+assert.equal(game.getState().xp,5);
+assert.equal(notices,1);
+assert.equal(game.place('fountain',9,9).reason,'insufficientResources');
+assert.equal(game.place('cottage',9,9).reason,'protectedItem');
+const moved=game.move(build.item.id,8,8);
+assert.equal(moved.ok,true);
+assert.equal(moved.item.readyAt,build.item.readyAt);
+assert.equal(game.move(build.item.id,6,1).reason,'occupied');
+assert.equal(game.move(build.item.id,12,5).reason,'outside');
+assert.equal(game.getState().items.find(item=>item.id===build.item.id).x,8);
+assert.equal(game.remove(1).reason,'protectedItem');
+const remove=game.remove(build.item.id);
+assert.deepEqual(remove.refund,{coins:60,wood:22,stone:10});
+assert.deepEqual(game.getState().inventory,{coins:190,wood:77,stone:50,fruit:0});
+assert.equal(game.remove(build.item.id).reason,'unknownItem');
+unsubscribe();
+console.log('PASS Geometric placement, resource spending, free moves, protected cottage and partial refunds');
+
+const harvest=game.harvest(2);
+assert.equal(harvest.ok,true);
+assert.deepEqual(harvest.reward,{fruit:4,coins:8});
+assert.equal(harvest.item.readyAt,clock+25000);
+assert.equal(game.getState().harvests,1);
+const afterHarvest=game.getState();
+assert.equal(game.harvest(2).reason,'notReady');
+assert.deepEqual(game.getState(),afterHarvest,'Double harvest changed rewards');
+clock+=24999;
+assert.equal(game.harvest(2).reason,'notReady');
+clock+=1;
+assert.equal(game.harvest(2).ok,true);
+assert.equal(game.harvest(1).reason,'notProducer');
+assert.equal(game.harvest(9999).reason,'unknownItem');
+const cost=game.upgradeCost(2),inventoryBeforeUpgrade=game.getState().inventory;
+assert.deepEqual(cost,{coins:34,wood:9});
+assert.equal(game.upgrade(2).ok,true);
+assert.equal(game.getState().inventory.coins,inventoryBeforeUpgrade.coins-34);
+assert.equal(game.productionSeconds(2),21);
+assert.deepEqual(game.productionYield(2),{fruit:6,coins:11});
+assert.equal(game.getState().items.find(item=>item.id===2).readyAt,clock+21000);
+clock+=21000;
+assert.deepEqual(game.harvest(2).reward,{fruit:6,coins:11});
+assert.equal(game.upgrade(2).ok,true);
+assert.equal(game.upgrade(2).reason,'maxLevel');
+assert.equal(game.upgradeCost(2),null);
+assert.equal(game.upgrade(6).reason,'maxLevel');
+console.log('PASS Production readiness, duplicate-harvest lock, timing boundary, upgrade costs and improved yield');
+
+const progress=create(new MemoryStorage(),()=>clock);
+const stage=progress.stage();
+assert.deepEqual(stage,{number:1,seed:20261028,moves:18,goals:{apple:12,grape:9},rewards:{coins:60,wood:25,stone:15,fruit:8}});
+assert.equal(progress.claimWin(2).reason,'wrongStage');
+assert.equal(progress.claimWin('1').reason,'invalidValue');
+assert.equal(progress.claimWin(1).ok,true);
+assert.equal(progress.getState().nextStage,2);
+assert.deepEqual(progress.getState().inventory,{coins:310,wood:125,stone:75,fruit:8});
+const won=progress.getState();
+assert.equal(progress.claimWin(1).reason,'alreadyClaimed');
+assert.deepEqual(progress.getState(),won,'Duplicate win rewarded twice');
+assert.equal(progress.currentOrder().id,1);
+assert.equal(progress.claimOrder(1).reason,'insufficientResources');
+progress.harvest(2);
+const order=progress.currentOrder();
+assert.equal(progress.claimOrder(order.id).ok,true);
+assert.deepEqual(progress.getState().inventory,{coins:383,wood:140,stone:75,fruit:0});
+assert.equal(progress.getState().ordersCompleted,1);
+const delivered=progress.getState();
+assert.equal(progress.claimOrder(order.id).reason,'wrongOrder');
+assert.deepEqual(progress.getState(),delivered,'Duplicate order changed progress');
+for(let stageNumber=2;stageNumber<=9;stageNumber++)assert.equal(progress.claimWin(stageNumber).ok,true);
+assert.equal(progress.getState().nextStage,10);
+assert.notEqual(progress.stage(9).seed,progress.stage(1).seed);
+assert.equal(progress.stage(9).moves,18);
+assert.equal(progress.getState().level,Math.floor(progress.getState().xp/100)+1);
+assert.equal(progress.stage(0),null);
+console.log('PASS Exactly-once stage rewards, order exchanges, progressive levels and seeded stage cycles');
+
+assert.equal(game.setLanguage('vi').ok,true);
+assert.equal(game.setMuted(true).ok,true);
+assert.equal(game.setReducedMotion(true).ok,true);
+const saved=game.getState();
+assert.deepEqual(create(storage,()=>clock).getState(),saved,'Reload lost farm state');
+assert.equal(game.setLanguage('fr').reason,'invalidValue');
+assert.equal(game.setMuted(1).reason,'invalidValue');
+assert.equal(game.setReducedMotion('false').reason,'invalidValue');
+assert.deepEqual(game.getState(),saved,'Invalid settings changed the save');
+clock+=86400000;
+const afterOffline=create(storage,()=>clock);
+assert.equal(afterOffline.harvest(2).ok,true,'Offline time did not make crops ready');
+assert.equal(afterOffline.harvest(2).reason,'notReady','Offline time incorrectly allowed multiple instant harvests');
+
+const broken=new MemoryStorage();broken.setItem(KEY,'not json');
+assert.equal(create(broken,()=>clock).getState().nextStage,1);
+broken.setItem(KEY,JSON.stringify({...saved,inventory:{...saved.inventory,coins:-9}}));
+assert.equal(create(broken,()=>clock).getState().inventory.coins,250);
+broken.setItem(KEY,JSON.stringify({...saved,items:[...saved.items,{id:999,type:'rice',x:2,y:1,level:1,readyAt:0}]}));
+assert.equal(create(broken,()=>clock).getState().items.length,17);
+const old=new MemoryStorage();old.setItem('fruit-bloom-demo-v1',JSON.stringify({language:'vi',assignments:{}}));
+assert.equal(create(old,()=>clock).getState().language,'vi');
+const unavailable={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}};
+const transient=create(unavailable,()=>clock);
+assert.equal(transient.getState().storageAvailable,false);
+assert.equal(transient.harvest(2).ok,true);
+assert.equal(transient.setLanguage('vi').ok,true);
+assert.equal(transient.getState().inventory.fruit,4);
+assert.equal(transient.getState().language,'vi');
+console.log('PASS Save/reload, offline production, defensive validation, old language preference and storage fallback');
