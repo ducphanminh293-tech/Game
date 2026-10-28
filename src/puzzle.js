@@ -1,192 +1,232 @@
-/* Hand-authored fruit-shooter demo. It never modifies the village economy. */
+/* Swap match-3 demo. The model is independent of rendering and village resources. */
 window.FB = window.FB || {};
 (() => {
-  const translations = {
+  'use strict';
+  const N = 6, TYPES = ['apple', 'grape', 'orange', 'pear', 'berry'];
+  const text = {
     en: {
-      'puzzle.title': 'First fruits', 'puzzle.start': 'Play the demo', 'puzzle.playButton': 'Play the demo',
-      'puzzle.eyebrow': 'A LITTLE HARVEST', 'puzzle.demo': 'Playable demo · one handmade stage',
-      'puzzle.aim': 'Aim, match, bloom.', 'puzzle.instructions': 'Move your mouse to aim, then click to shoot. Match 3 or more of the same fruit to pop a cluster.',
-      'puzzle.touch': 'On a touch screen, tap the place you want to aim at.',
-      'puzzle.rules': 'Fruit can bounce off the side walls. Fruit disconnected from the top will fall and count toward your goals.',
-      'puzzle.keys': 'Keyboard: focus the board, aim with ← / →, then press Space to shoot.',
-      'puzzle.shots': 'Shots left', 'puzzle.next': 'Next fruit', 'puzzle.current': 'Ready to shoot',
-      'puzzle.restart': 'Try again', 'puzzle.exit': 'Back to village',
-      'puzzle.win': 'A lovely harvest!', 'puzzle.winBody': 'You collected both goals. Your little garden is off to a good start.',
-      'puzzle.lose': 'Try a fresh angle', 'puzzle.loseShots': 'You used all 18 shots. Aim for a group of the same fruit and give it another go.',
-      'puzzle.loseLine': 'The fruit reached the garden gate. Clear clusters before they grow too low.',
-      'puzzle.noRewards': 'Demo only: no materials or tickets are awarded. Values and matching rules are still being tested.',
-      'puzzle.demoNote': 'One handmade demo stage. No materials or tickets are awarded; values and rules are illustrative.',
-      'puzzle.board': 'Fruit-shooting board. Move pointer to aim and click to shoot, or use arrow keys and Space.',
-      'puzzle.ready': 'Match the fruit below to a cluster above.',
-      'puzzle.collected': 'Collected {amount} fruit.', 'puzzle.miss': 'Fruit placed. Match at least 3 to pop the group.',
-      'puzzle.goal': 'Collect both fruits', 'puzzle.boundary': 'GARDEN GATE', 'puzzle.celebration': 'Goals complete',
+      title:'First fruits', eyebrow:'MATCH-3 · STAGE 01', playButton:'Play match-3',
+      aim:'Swap. Match. Harvest.', instructions:'Drag a fruit to its neighbour, or click two adjacent fruits. Match 3 or more in a row or column.',
+      rules:'Invalid swaps cost no moves. Falling fruit can create a chain of matches.',
+      keys:'Keyboard: arrow keys to move, Space or Enter to select two neighbours.',
+      moves:'Moves left', restart:'Try again', exit:'Back to village', hint:'Show a match',
+      win:'A lovely harvest!', winBody:'Both baskets are full. Your garden has a bright beginning.',
+      lose:'Another harvest awaits', loseBody:'No moves left. Try collecting both fruits in 18 moves.',
+      demoNote:'One match-3 demo. Rewards and village production are not connected yet.',
+      board:'Fruit matching board. Select two adjacent fruits to swap.', ready:'Collect 12 apples and 9 grapes.',
+      invalid:'That swap makes no match. No move used.', adjacent:'Choose a neighbouring fruit.',
+      collected:'Collected {amount} fruit · {chains} chain(s).', shuffled:'No matches available — the board has been shuffled.',
+      selected:'Fruit selected. Choose a neighbour.', hintShown:'The two outlined fruits can make a match.',
+      apple:'Apple', grape:'Grapes', orange:'Orange', pear:'Pear', berry:'Blueberry',
+      cell:'{fruit}, row {row}, column {col}', goal:'Fill both baskets',
     },
     vi: {
-      'puzzle.title': 'Mùa quả đầu tiên', 'puzzle.start': 'Chơi thử', 'puzzle.playButton': 'Chơi thử',
-      'puzzle.eyebrow': 'MÙA THU HOẠCH NHỎ', 'puzzle.demo': 'Chơi thử · một màn thiết kế sẵn',
-      'puzzle.aim': 'Ngắm, ghép, nở hoa.', 'puzzle.instructions': 'Di chuột để ngắm rồi bấm để bắn. Ghép từ 3 trái cùng loại trở lên để làm nổ cụm.',
-      'puzzle.touch': 'Trên màn hình cảm ứng, chạm vào vị trí muốn ngắm.',
-      'puzzle.rules': 'Trái cây có thể bật vào hai thành bên. Những trái không còn nối với trần sẽ rơi xuống và được tính vào mục tiêu.',
-      'puzzle.keys': 'Bàn phím: chọn bảng chơi, ngắm bằng ← / → rồi nhấn Space để bắn.',
-      'puzzle.shots': 'Lượt bắn còn lại', 'puzzle.next': 'Trái tiếp theo', 'puzzle.current': 'Sẵn sàng bắn',
-      'puzzle.restart': 'Chơi lại', 'puzzle.exit': 'Về ngôi làng',
-      'puzzle.win': 'Mùa thu hoạch thật đẹp!', 'puzzle.winBody': 'Bạn đã hoàn thành cả hai mục tiêu. Khu vườn nhỏ có một khởi đầu đầy hứa hẹn.',
-      'puzzle.lose': 'Thử một góc bắn mới', 'puzzle.loseShots': 'Bạn đã dùng hết 18 lượt bắn. Hãy ngắm vào cụm cùng loại và thử lại nhé.',
-      'puzzle.loseLine': 'Trái cây đã chạm cổng vườn. Hãy phá các cụm trước khi chúng xuống quá thấp.',
-      'puzzle.noRewards': 'Chỉ chơi thử: không cộng nguyên liệu hay vé. Số liệu và luật ghép vẫn đang thử nghiệm.',
-      'puzzle.demoNote': 'Một màn chơi thử thiết kế sẵn. Không cộng nguyên liệu hay vé; số liệu và luật chỉ là minh họa.',
-      'puzzle.board': 'Bảng bắn trái cây. Di chuột để ngắm và bấm để bắn, hoặc dùng phím mũi tên và Space.',
-      'puzzle.ready': 'Ghép trái đang cầm với một cụm cùng loại phía trên.',
-      'puzzle.collected': 'Đã thu {amount} trái cây.', 'puzzle.miss': 'Đã đặt trái. Ghép ít nhất 3 trái để làm nổ cụm.',
-      'puzzle.goal': 'Thu đủ cả hai loại', 'puzzle.boundary': 'CỔNG VƯỜN', 'puzzle.celebration': 'Đủ mục tiêu',
+      title:'Mùa quả đầu tiên', eyebrow:'GHÉP 3 · MÀN 01', playButton:'Chơi ghép 3',
+      aim:'Đổi chỗ. Ghép. Thu hoạch.', instructions:'Kéo một trái sang ô bên cạnh, hoặc bấm lần lượt hai trái liền kề. Ghép từ 3 trái theo hàng ngang hoặc dọc.',
+      rules:'Đổi chỗ không tạo nhóm sẽ không mất lượt. Trái rơi xuống có thể tạo chuỗi ghép liên tiếp.',
+      keys:'Bàn phím: phím mũi tên để di chuyển, Space hoặc Enter để chọn hai ô liền kề.',
+      moves:'Lượt còn lại', restart:'Chơi lại', exit:'Về ngôi làng', hint:'Gợi ý một nước',
+      win:'Mùa thu hoạch thật đẹp!', winBody:'Bạn đã thu đủ cả hai giỏ trái cây. Khu vườn có một khởi đầu tươi sáng.',
+      lose:'Cùng thử một mùa mới', loseBody:'Đã hết lượt. Hãy thử thu đủ cả hai loại trái cây trong 18 lượt.',
+      demoNote:'Một màn ghép 3 chơi thử. Chưa kết nối phần thưởng hoặc sản xuất trong làng.',
+      board:'Bảng ghép trái cây. Chọn hai trái liền kề để đổi chỗ.', ready:'Thu thập 12 táo và 9 chùm nho.',
+      invalid:'Chưa tạo được nhóm ghép. Bạn không mất lượt.', adjacent:'Hãy chọn trái ở ô liền kề.',
+      collected:'Đã thu {amount} trái · {chains} chuỗi ghép.', shuffled:'Hết nước ghép — bảng đã được xáo lại.',
+      selected:'Đã chọn trái. Hãy chọn ô liền kề.', hintShown:'Hai trái có viền sáng có thể tạo nhóm ghép.',
+      apple:'Táo', grape:'Nho', orange:'Cam', pear:'Lê', berry:'Việt quất',
+      cell:'{fruit}, hàng {row}, cột {col}', goal:'Thu đủ hai giỏ',
     },
   };
-  Object.keys(translations).forEach(language => Object.assign(FB.translations[language], translations[language]));
+  for (const language of ['en','vi']) for (const [key,value] of Object.entries(text[language])) FB.translations[language][`puzzle.${key}`] = value;
 
-  const W=640, H=430, R=16, STEP=32, DY=Math.sqrt(3)*R;
-  const LEFT=96, RIGHT=544, TOP=42, LIMIT=316, ORIGIN={x:320,y:382};
-  const key=(r,c)=>`${r}:${c}`;
-  const point=(r,c)=>({x:LEFT+R+c*STEP+(r%2)*R,y:TOP+r*DY});
-  const valid=(r,c)=>r>=0&&r<=10&&c>=0&&c<(r%2?13:14);
-  const neighbors=(r,c)=>[[r,c-1],[r,c+1],[r-1,c-(r%2?0:1)],[r-1,c+(r%2?1:0)],[r+1,c-(r%2?0:1)],[r+1,c+(r%2?1:0)]].filter(([a,b])=>valid(a,b));
-  const clampAngle=angle=>Math.max(-Math.PI+.25,Math.min(-.25,angle));
-  const nextType=shots=>shots%2===0?'apple':'grape';
-  function createModel() {
-    let board=new Map(), used=0, collected={apple:0,grape:0}, status='playing', reason='';
-    for(let row=0;row<3;row++) for(const [cols,type] of [[[1,2],'apple'],[[4,5],'grape'],[[8,9],'apple'],[[11,12],'grape']]) {
-      for(const col of cols) board.set(key(row,col),{row,col,type,...point(row,col)});
-    }
-    function snapshot(){return {board:[...board.values()].map(f=>({...f})),shotsLeft:18-used,shotsUsed:used,collected:{...collected},status,reason,current:nextType(used),next:nextType(used+1)};}
-    function trace(angle) {
-      angle=clampAngle(angle);
-      let x=ORIGIN.x,y=ORIGIN.y,dx=Math.cos(angle)*3,dy=Math.sin(angle)*3,bounces=0,hit=null;
-      const path=[{x,y}];
-      for(let i=0;i<1600;i++) {
-        x+=dx;y+=dy;
-        if(x<LEFT+R){x=2*(LEFT+R)-x;dx=-dx;bounces++;}
-        if(x>RIGHT-R){x=2*(RIGHT-R)-x;dx=-dx;bounces++;}
-        path.push({x,y});
-        hit=[...board.values()].find(f=>Math.hypot(f.x-x,f.y-y)<=R*2-1);
-        if(hit||y<=TOP)break;
+  const adjacent = (a,b) => Number.isInteger(a) && Number.isInteger(b) && a>=0 && b>=0 && a<N*N && b<N*N && Math.abs(Math.floor(a/N)-Math.floor(b/N))+Math.abs(a%N-b%N)===1;
+  function matches(board) {
+    const found = new Set();
+    for (let axis=0;axis<2;axis++) for (let line=0;line<N;line++) {
+      let start=0;
+      const at = pos => axis ? pos*N+line : line*N+pos;
+      for (let end=1;end<=N;end++) {
+        if (end<N && board[at(start)] && board[at(start)]===board[at(end)]) continue;
+        if (board[at(start)] && end-start>=3) for (let p=start;p<end;p++) found.add(at(p));
+        start=end;
       }
-      return {path,hit,x,y,bounces};
     }
-    function shoot(angle) {
-      if(status!=='playing')return null;
-      const travel=trace(angle), type=nextType(used), before=snapshot().board;
-      let candidates=travel.hit?neighbors(travel.hit.row,travel.hit.col):Array.from({length:14},(_,c)=>[0,c]);
-      candidates=candidates.filter(([r,c])=>!board.has(key(r,c)));
-      // Snap only into a real adjacent hex cell; a fully blocked collision is a loss.
-      candidates.sort((a,b)=>Math.hypot(point(...a).x-travel.x,point(...a).y-travel.y)-Math.hypot(point(...b).x-travel.x,point(...b).y-travel.y));
+    return [...found];
+  }
+  function legalMoves(board) {
+    const moves=[];
+    for (let a=0;a<N*N;a++) for (const b of [a+1,a+N]) {
+      if (!adjacent(a,b) || board[a]===board[b]) continue;
+      const copy=board.slice(); [copy[a],copy[b]]=[copy[b],copy[a]];
+      if (matches(copy).length) moves.push([a,b]);
+    }
+    return moves;
+  }
+  function createModel(options={}) {
+    let seed=(options.seed ?? 20261028)>>>0, used=0, status='playing';
+    const limit=options.moves ?? 18, goals={apple:12,grape:9,...options.goals};
+    const collected=Object.fromEntries(TYPES.map(type=>[type,0]));
+    const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    const pick=()=>TYPES[Math.floor(random()*TYPES.length)];
+    function freshBoard() {
+      let next;
+      do {
+        next=[];
+        for (let i=0;i<N*N;i++) {
+          const choices=TYPES.filter(type=>!(i%N>=2 && next[i-1]===type && next[i-2]===type) && !(i>=N*2 && next[i-N]===type && next[i-N*2]===type));
+          next.push(choices[Math.floor(random()*choices.length)]);
+        }
+      } while(!legalMoves(next).length);
+      return next;
+    }
+    let board=options.board ? options.board.slice() : freshBoard();
+    if (board.length!==N*N || board.some(type=>!TYPES.includes(type)) || matches(board).length) throw new Error('A starting board needs 36 fruits and no existing matches.');
+    if (!legalMoves(board).length) board=freshBoard();
+    const snapshot=()=>({board:board.slice(),movesUsed:used,movesLeft:limit-used,collected:{...collected},goals:{...goals},status,size:N});
+    function swap(a,b) {
+      if (status!=='playing') return null;
+      if (!adjacent(a,b)) return {valid:false,reason:'adjacent'};
+      const before=board.slice(); [board[a],board[b]]=[board[b],board[a]];
+      let found=matches(board);
+      if (!found.length) { board=before; return {valid:false,reason:'invalid',before,a,b}; }
       used++;
-      if(!candidates.length){status='lost';reason='line';return {...travel,before,type,removed:[],after:snapshot()};}
-      const [row,col]=candidates[0], fruit={row,col,type,...point(row,col)};
-      board.set(key(row,col),fruit);
-      const connected=new Set(),queue=[fruit];
-      while(queue.length){const f=queue.pop(),id=key(f.row,f.col);if(connected.has(id))continue;connected.add(id);for(const [r,c] of neighbors(f.row,f.col)){const n=board.get(key(r,c));if(n?.type===type&&!connected.has(key(r,c)))queue.push(n);}}
-      const removed=[];
-      if(connected.size>=3){
-        for(const id of connected){removed.push(board.get(id));board.delete(id);}
-        const anchored=new Set(),stack=[...board.values()].filter(f=>f.row===0);
-        while(stack.length){const f=stack.pop(),id=key(f.row,f.col);if(anchored.has(id))continue;anchored.add(id);for(const [r,c] of neighbors(f.row,f.col)){const n=board.get(key(r,c));if(n&&!anchored.has(key(r,c)))stack.push(n);}}
-        for(const [id,f] of board){if(!anchored.has(id)){removed.push({...f,dropped:true});board.delete(id);}}
-        removed.forEach(f=>collected[f.type]++);
+      const steps=[]; let removed=0, reshuffled=false;
+      while(found.length) {
+        const current=board.slice();
+        found.forEach(i=>{collected[board[i]]++;removed++;board[i]=null;});
+        const falls={};
+        for(let col=0;col<N;col++) {
+          let bottom=N-1;
+          for(let row=N-1;row>=0;row--) if(board[row*N+col]) {
+            board[bottom*N+col]=board[row*N+col]; falls[bottom*N+col]=bottom-row; bottom--;
+          }
+          for(let row=bottom;row>=0;row--) {board[row*N+col]=pick();falls[row*N+col]=bottom+1;}
+        }
+        steps.push({board:current,matched:found,after:board.slice(),falls});
+        found=matches(board);
+        // A safety bound for pathological refill sequences; never leave a pending match.
+        if(steps.length>=100 && found.length){board=freshBoard();reshuffled=true;break;}
       }
-      if(collected.apple>=12&&collected.grape>=9)status='won';
-      else if([...board.values()].some(f=>f.y+R>=LIMIT)){status='lost';reason='line';}
-      else if(used>=18){status='lost';reason='shots';}
-      return {...travel,before,type,removed,placed:fruit,after:snapshot()};
+      if(Object.entries(goals).every(([type,amount])=>collected[type]>=amount))status='won';
+      else if(used>=limit)status='lost';
+      else if(!legalMoves(board).length){board=freshBoard();reshuffled=true;}
+      return {valid:true,before,a,b,steps,removed,reshuffled,after:snapshot()};
     }
-    return {snapshot,trace,shoot};
+    return {snapshot,swap,legalMoves:()=>status==='playing'?legalMoves(board):[]};
   }
 
-  let model=createModel(), root=null, canvas=null, ctx=null, translate=null, angle=-Math.PI/2;
-  let raf=0,lastTime=0,flight=null,effects=[],message='puzzle.ready',messageAmount=0,cleanup=[];
-  function getState(){return model.snapshot();}
-  function drawFruit(context,x,y,type,r=R,alpha=1){
-    context.save();context.globalAlpha=alpha;
-    const grape=type==='grape', gradient=context.createRadialGradient(x-r*.4,y-r*.5,2,x,y,r*1.2);
-    gradient.addColorStop(0,grape?'#d8bee8':'#ffd197');gradient.addColorStop(.55,grape?'#a988c0':'#ef9872');gradient.addColorStop(1,grape?'#775798':'#cb6c53');
-    context.shadowColor='#345a3730';context.shadowBlur=4;context.shadowOffsetY=3;
-    context.fillStyle=gradient;context.beginPath();context.arc(x,y,r,0,Math.PI*2);context.fill();context.shadowColor='transparent';
-    context.strokeStyle=grape?'#785b94':'#ae6352';context.lineWidth=1.5;context.stroke();
-    context.fillStyle=grape?'#72528e':'#f1b48c';
-    if(grape){for(const [a,b] of [[-4,-4],[4,-4],[-7,2],[0,2],[7,2],[-3,8],[3,8]]){context.beginPath();context.arc(x+a*r/16,y+b*r/16,r*.19,0,Math.PI*2);context.fill();}}
-    else{context.strokeStyle='#fff1c3aa';context.lineWidth=2;context.beginPath();context.arc(x-3,y-2,r*.6,Math.PI*.85,Math.PI*1.3);context.stroke();}
-    context.strokeStyle='#696b3b';context.lineWidth=2;context.beginPath();context.moveTo(x,y-r*.5);context.quadraticCurveTo(x-2,y-r*.9,x+1,y-r*1.04);context.stroke();
-    context.fillStyle='#778f4d';context.beginPath();context.ellipse(x+r*.23,y-r*.83,r*.23,r*.1,-.5,0,Math.PI*2);context.fill();
-    context.restore();
+  // Original vector fruit: silhouettes as well as colours distinguish the pieces.
+  function fruitSVG(type) {
+    const leaf='<path d="M31 13Q34 3 44 6Q43 16 31 13" fill="#5d9241"/><path d="M30 16l2-10" stroke="#6e5832" stroke-width="3" stroke-linecap="round"/>';
+    const shapes={
+      apple:'<path d="M31 18C16 8 7 21 11 36C15 53 25 54 31 49C38 54 48 50 52 35C57 17 42 10 31 18Z" fill="#ee6657" stroke="#bf4b40" stroke-width="2"/><path d="M19 24Q15 29 18 35" fill="none" stroke="#ffc5a0" stroke-width="4" stroke-linecap="round"/>'+leaf,
+      grape:leaf+'<g fill="#9b71c3" stroke="#755098" stroke-width="1.8"><circle cx="24" cy="23" r="10"/><circle cx="40" cy="23" r="10"/><circle cx="17" cy="35" r="9"/><circle cx="32" cy="36" r="10"/><circle cx="46" cy="35" r="9"/><circle cx="25" cy="46" r="9"/><circle cx="39" cy="46" r="9"/><circle cx="32" cy="53" r="7"/></g><path d="M20 20l3-2m13 0 3-1" stroke="#e3c7f1" stroke-width="3" stroke-linecap="round"/>',
+      orange:'<circle cx="32" cy="34" r="22" fill="#f5ab3c" stroke="#d8892f" stroke-width="2"/><path d="M18 27Q19 22 24 21" fill="none" stroke="#ffe4a0" stroke-width="4" stroke-linecap="round"/><g fill="#d88b34"><circle cx="40" cy="43" r="1.3"/><circle cx="44" cy="35" r="1.3"/><circle cx="35" cy="48" r="1.3"/></g>'+leaf,
+      pear:'<path d="M24 19C25 11 39 11 40 21C41 31 52 35 50 45C47 60 17 61 13 46C10 35 23 29 24 19Z" fill="#a8c957" stroke="#7da040" stroke-width="2"/><path d="M22 37q-5 7-1 11" fill="none" stroke="#e6ed9e" stroke-width="4" stroke-linecap="round"/>'+leaf,
+      berry:'<circle cx="32" cy="35" r="22" fill="#608bbd" stroke="#406590" stroke-width="2"/><path d="m32 16 4 7 8-1-5 7 3 7-10-3-8 3 3-8-5-6 8 1Z" fill="#385778"/><path d="M17 35q-1 8 6 12" fill="none" stroke="#a7cbe9" stroke-width="4" stroke-linecap="round"/>',
+    };
+    return `<svg viewBox="0 0 64 64" aria-hidden="true">${shapes[type]}</svg>`;
   }
-  function draw(now){
-    if(!ctx)return;
-    ctx.clearRect(0,0,W,H);
-    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#dce8cd');bg.addColorStop(1,'#b0c99d');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#91b38126';for(let i=0;i<12;i++){ctx.beginPath();ctx.ellipse((i*191)%W,40+(i*83)%H,65,35,i,0,Math.PI*2);ctx.fill();}
-    ctx.fillStyle='#f9f3d64d';ctx.fillRect(LEFT-5,TOP-21,RIGHT-LEFT+10,LIMIT-TOP+21);
-    ctx.strokeStyle='#789563';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(LEFT-3,LIMIT);ctx.lineTo(LEFT-3,TOP-23);ctx.quadraticCurveTo(LEFT-3,TOP-29,LEFT+5,TOP-29);ctx.lineTo(RIGHT-5,TOP-29);ctx.quadraticCurveTo(RIGHT+3,TOP-29,RIGHT+3,TOP-23);ctx.lineTo(RIGHT+3,LIMIT);ctx.stroke();
-    ctx.strokeStyle='#9b815960';ctx.lineWidth=1;ctx.setLineDash([5,6]);ctx.beginPath();ctx.moveTo(LEFT,LIMIT);ctx.lineTo(RIGHT,LIMIT);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#71825e';ctx.font='8px Trebuchet MS, sans-serif';ctx.textAlign='center';ctx.fillText(translate('puzzle.boundary'),W/2,LIMIT+12);
-    const state=model.snapshot();
-    if(flight){
-      const duration=Math.min(650,Math.max(220,flight.path.length*1.5));
-      const progress=Math.max(0,Math.min(1,(now-flight.start)/duration)),index=Math.min(flight.path.length-1,Math.floor(progress*(flight.path.length-1)));
-      flight.before.forEach(f=>drawFruit(ctx,f.x,f.y,f.type));
-      const p=flight.path[index];drawFruit(ctx,p.x,p.y,flight.type);
-      if(progress>=1){effects=flight.removed.map((f,i)=>({...f,start:now,dx:(i%5-2)*12}));message=flight.removed.length?'puzzle.collected':'puzzle.miss';messageAmount=flight.removed.length;flight=null;updateHud();}
-    }else{
-      state.board.forEach(f=>drawFruit(ctx,f.x,f.y,f.type));
-      if(state.status==='playing'){
-        const path=model.trace(angle).path;
-        for(let i=8;i<path.length;i+=9){ctx.fillStyle=`rgba(255,251,219,${Math.max(.15,.85-i/path.length*.6)})`;ctx.beginPath();ctx.arc(path[i].x,path[i].y,2.1,0,Math.PI*2);ctx.fill();}
-      }
-    }
-    const reduced=FB.state?.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(!reduced){effects=effects.filter(f=>now-f.start<550);effects.forEach(f=>{const p=(now-f.start)/550;drawFruit(ctx,f.x+f.dx*p,f.y+(f.dropped?100*p:-20*Math.sin(p*Math.PI)),f.type,R*(1-p*.4),1-p);});}
-    ctx.save();ctx.translate(ORIGIN.x,ORIGIN.y);ctx.rotate(angle+Math.PI/2);ctx.fillStyle='#a68b56';ctx.beginPath();ctx.roundRect(-13,-34,26,43,9);ctx.fill();ctx.fillStyle='#d9bf80';ctx.fillRect(-8,-32,16,19);ctx.restore();
-    ctx.fillStyle='#f4e7bd';ctx.strokeStyle='#fff5d5';ctx.lineWidth=4;ctx.beginPath();ctx.arc(ORIGIN.x,ORIGIN.y,24,0,Math.PI*2);ctx.fill();ctx.stroke();
-    if(!flight&&state.status==='playing')drawFruit(ctx,ORIGIN.x,ORIGIN.y,state.current,18);
-    ctx.fillStyle='#6a8058';ctx.font='9px Trebuchet MS, sans-serif';ctx.textAlign='center';ctx.fillText(translate('puzzle.current'),ORIGIN.x,H-8);
-    drawFruit(ctx,ORIGIN.x+85,ORIGIN.y+2,state.next,12);ctx.fillText(translate('puzzle.next'),ORIGIN.x+85,H-8);
-    lastTime=now;raf=requestAnimationFrame(draw);
+  let model=createModel(), root=null, translate=null, selected=null, cursor=0, hint=[], busy=false;
+  let cleanup=[], timers=new Set(), generation=0, message='ready', messageVars={};
+  const getState=()=>({...model.snapshot(),busy});
+  const later=ms=>new Promise(resolve=>{const timer=setTimeout(()=>{timers.delete(timer);resolve();},ms);timers.add(timer);});
+  const say=(key,vars={})=>{message=key;messageVars=vars; if(root)root.querySelector('[data-puzzle-status]').textContent=translate(`puzzle.${key}`,vars);};
+  function renderBoard(board=model.snapshot().board,falls={}) {
+    if(!root)return;
+    const focused=root.querySelector('.match-board')?.contains(document.activeElement);
+    root.querySelector('.match-board').innerHTML=board.map((type,i)=>`<button class="fruit-tile ${selected===i?'selected':''} ${hint.includes(i)?'hinted':''} ${falls[i]?'falling':''}" data-cell="${i}" tabindex="${i===cursor?'0':'-1'}" aria-pressed="${selected===i}" aria-label="${translate('puzzle.cell',{fruit:translate(`puzzle.${type}`),row:Math.floor(i/N)+1,col:i%N+1})}" style="--fall:${falls[i]||0}">${fruitSVG(type)}</button>`).join('');
+    if(focused)root.querySelector(`[data-cell="${cursor}"]`)?.focus({preventScroll:true});
   }
-  function updateHud(){
+  function updateHud() {
     if(!root)return;
     const state=model.snapshot();
-    root.querySelector('[data-puzzle-apples]').textContent=`${Math.min(12,state.collected.apple)} / 12`;
-    root.querySelector('[data-puzzle-grapes]').textContent=`${Math.min(9,state.collected.grape)} / 9`;
-    root.querySelector('[data-puzzle-shots]').textContent=state.shotsLeft;
-    root.querySelector('[data-puzzle-status]').textContent=translate(message,{amount:messageAmount});
-    const overlay=root.querySelector('[data-puzzle-result]');
-    overlay.hidden=state.status==='playing'||!!flight;
-    if(!overlay.hidden){const won=state.status==='won';overlay.innerHTML=`<div class="puzzle-result-card"><span class="tag ${won?'gold':'muted'}">${FB.icon(won?'leaf':'info')}${translate('common.demoOnly')}</span><h3>${translate(won?'puzzle.win':'puzzle.lose')}</h3><p>${translate(won?'puzzle.winBody':state.reason==='shots'?'puzzle.loseShots':'puzzle.loseLine')}</p><p class="puzzle-small">${translate('puzzle.noRewards')}</p><button class="primary-button" data-puzzle-restart>${FB.icon('play')}${translate('puzzle.restart')}</button><button class="secondary-button" data-close>${translate('puzzle.exit')}</button></div>`;}
+    for(const type of ['apple','grape'])root.querySelector(`[data-puzzle-${type}]`).textContent=`${Math.min(state.goals[type],state.collected[type])} / ${state.goals[type]}`;
+    root.querySelector('[data-puzzle-moves]').textContent=state.movesLeft;
+    root.querySelector('[data-puzzle-hint]').disabled=busy || state.status!=='playing';
+    root.querySelector('.match-board').setAttribute('aria-busy',String(busy));
+    const result=root.querySelector('[data-puzzle-result]'); result.hidden=busy || state.status==='playing';
+    if(!result.hidden) {
+      const won=state.status==='won';
+      result.innerHTML=`<div class="puzzle-result-card"><span class="tag gold">${translate('puzzle.goal')}</span><h3>${translate(won?'puzzle.win':'puzzle.lose')}</h3><p>${translate(won?'puzzle.winBody':'puzzle.loseBody')}</p><button class="primary-button" data-puzzle-restart>${translate('puzzle.restart')}</button><button class="secondary-button" data-close>${translate('puzzle.exit')}</button></div>`;
+      result.querySelector('button').focus({preventScroll:true});
+    }
+    say(message,messageVars);
   }
-  function fire(){
-    if(flight||model.snapshot().status!=='playing')return;
-    const result=model.shoot(angle);if(!result)return;
-    flight={...result,start:performance.now()};effects=[];updateHud();
+  async function attempt(a,b) {
+    if(busy || model.snapshot().status!=='playing')return;
+    const result=model.swap(a,b); if(!result)return;
+    selected=null;hint=[];
+    if(result.reason==='adjacent'){say('adjacent');renderBoard();return;}
+    busy=true;const token=++generation;
+    renderBoard(result.before);updateHud();
+    const reduced=FB.state?.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const tiles=[root.querySelector(`[data-cell="${a}"]`),root.querySelector(`[data-cell="${b}"]`)];
+    const boxes=tiles.map(tile=>tile.getBoundingClientRect());
+    tiles.forEach((tile,i)=>{tile.classList.add('swapping');tile.style.transform=`translate(${boxes[1-i].x-boxes[i].x}px,${boxes[1-i].y-boxes[i].y}px)`;});
+    await later(reduced?30:180);if(token!==generation || !root)return;
+    if(!result.valid) {
+      tiles.forEach(tile=>tile.style.transform='');
+      await later(reduced?30:180);if(token!==generation || !root)return;
+      say('invalid');
+    } else {
+      for(const step of result.steps) {
+        renderBoard(step.board);
+        step.matched.forEach(i=>root.querySelector(`[data-cell="${i}"]`).classList.add('matched'));
+        await later(reduced?30:180);if(token!==generation || !root)return;
+        renderBoard(step.after,reduced?{}:step.falls);
+        await later(reduced?30:230);if(token!==generation || !root)return;
+      }
+      say(result.reshuffled?'shuffled':'collected',{amount:result.removed,chains:result.steps.length});
+    }
+    busy=false;renderBoard();updateHud();
   }
-  function unmount(){
-    if(raf)cancelAnimationFrame(raf);raf=0;
-    cleanup.forEach(f=>f());cleanup=[];
-    if(flight&&!flight.pausedAt)flight.pausedAt=performance.now();
-    root=null;canvas=null;ctx=null;
+  function choose(i) {
+    if(busy || model.snapshot().status!=='playing')return;
+    cursor=i;hint=[];
+    if(selected===null || selected===i){selected=selected===i?null:i;say(selected===null?'ready':'selected');renderBoard();}
+    else if(adjacent(selected,i))attempt(selected,i);
+    else {selected=i;say('adjacent');renderBoard();}
   }
-  function reset(){
-    model=createModel();angle=-Math.PI/2;flight=null;effects=[];message='puzzle.ready';messageAmount=0;
-    if(root)updateHud();
+  function unmount() {
+    generation++;timers.forEach(clearTimeout);timers.clear();cleanup.forEach(fn=>fn());cleanup=[];
+    // A language switch settles the already accepted move; never replays or charges it twice.
+    busy=false;root=null;
   }
-  function mount(container,t){
+  function reset() {
+    generation++;timers.forEach(clearTimeout);timers.clear();model=createModel();busy=false;selected=null;cursor=0;hint=[];message='ready';messageVars={};
+    if(root){renderBoard();updateHud();root.querySelector('[data-cell="0"]').focus({preventScroll:true});}
+  }
+  function mount(container,t) {
     unmount();root=container;translate=t;
-    if(flight?.pausedAt){flight.start+=performance.now()-flight.pausedAt;delete flight.pausedAt;}
-    root.innerHTML=`<div class="puzzle-shell"><div class="puzzle-goalbar"><div class="puzzle-goal apple">${FB.icon('apple')}<div><small>${t('resource.apple')}</small><strong data-puzzle-apples></strong></div></div><div class="puzzle-goal grape">${FB.icon('grape')}<div><small>${t('resource.grape')}</small><strong data-puzzle-grapes></strong></div></div><div class="puzzle-shot-count"><small>${t('puzzle.shots')}</small><strong data-puzzle-shots></strong></div></div><div class="puzzle-main"><div class="puzzle-board-wrap"><canvas class="puzzle-canvas" width="640" height="430" tabindex="0" aria-label="${t('puzzle.board')}"></canvas><div class="puzzle-result" data-puzzle-result hidden></div></div><aside class="puzzle-sidebar"><span class="tag gold">${t('common.demoOnly')}</span><h3>${t('puzzle.aim')}</h3><p>${t('puzzle.instructions')}</p><p>${t('puzzle.rules')}</p><p class="puzzle-small">${t('puzzle.touch')}</p><p class="puzzle-small">${t('puzzle.keys')}</p><button class="secondary-button" data-puzzle-restart>${FB.icon('center')}${t('puzzle.restart')}</button><p class="puzzle-status" data-puzzle-status role="status" aria-live="polite"></p></aside></div></div>`;
-    canvas=root.querySelector('canvas');ctx=canvas.getContext('2d');
-    const listen=(el,name,fn,options)=>{el.addEventListener(name,fn,options);cleanup.push(()=>el.removeEventListener(name,fn,options));};
-    const aim=event=>{const b=canvas.getBoundingClientRect(),x=(event.clientX-b.left)/b.width*W,y=(event.clientY-b.top)/b.height*H;angle=clampAngle(Math.atan2(Math.min(y,ORIGIN.y-30)-ORIGIN.y,x-ORIGIN.x));};
-    listen(canvas,'pointermove',aim);
-    listen(canvas,'pointerdown',event=>{if(event.button!==0)return;event.preventDefault();aim(event);canvas.focus({preventScroll:true});fire();});
-    listen(canvas,'keydown',event=>{if(['ArrowLeft','ArrowRight',' ','Enter'].includes(event.key)){event.preventDefault();if(event.key==='ArrowLeft')angle=clampAngle(angle-.055);else if(event.key==='ArrowRight')angle=clampAngle(angle+.055);else fire();}});
-    listen(root,'click',event=>{if(event.target.closest('[data-puzzle-restart]')){reset();canvas.focus({preventScroll:true});}});
-    updateHud();raf=requestAnimationFrame(draw);
+    root.innerHTML=`<div class="puzzle-shell"><div class="puzzle-board-wrap"><div class="match-board" role="group" aria-label="${t('puzzle.board')}"></div><div class="puzzle-result" data-puzzle-result hidden></div></div><aside class="puzzle-sidebar"><span class="tag gold">${t('puzzle.goal')}</span><h3>${t('puzzle.aim')}</h3><div class="puzzle-goalbar">${['apple','grape'].map(type=>`<div class="puzzle-goal ${type}">${fruitSVG(type)}<div><small>${t(`puzzle.${type}`)}</small><strong data-puzzle-${type}></strong></div></div>`).join('')}<div class="puzzle-move-count"><small>${t('puzzle.moves')}</small><strong data-puzzle-moves></strong></div></div><p class="puzzle-instructions">${t('puzzle.instructions')}</p><p class="puzzle-rules">${t('puzzle.rules')}</p><div class="puzzle-actions"><button class="primary-button" data-puzzle-hint>${t('puzzle.hint')}</button><button class="secondary-button" data-puzzle-restart>${t('puzzle.restart')}</button></div><p class="puzzle-status" data-puzzle-status role="status" aria-live="polite"></p><p class="puzzle-keys">${t('puzzle.keys')}</p></aside></div>`;
+    const listen=(el,name,fn)=>{el.addEventListener(name,fn);cleanup.push(()=>el.removeEventListener(name,fn));};
+    let down=null,suppressClick=false;
+    const board=root.querySelector('.match-board');
+    listen(board,'pointerdown',e=>{const cell=e.target.closest('[data-cell]');if(!cell || e.button!==0 || busy)return;down={i:Number(cell.dataset.cell),x:e.clientX,y:e.clientY,id:e.pointerId};board.setPointerCapture(e.pointerId);});
+    listen(board,'pointerup',e=>{
+      if(!down || e.pointerId!==down.id)return;
+      const dx=e.clientX-down.x,dy=e.clientY-down.y;
+      if(Math.hypot(dx,dy)>12) {
+        const offset=Math.abs(dx)>Math.abs(dy)?(dx>0?1:-1):(dy>0?N:-N), target=down.i+offset;
+        suppressClick=true;if(adjacent(down.i,target))attempt(down.i,target);
+      } else choose(down.i);
+      down=null;
+    });
+    listen(board,'pointercancel',()=>{down=null;suppressClick=false;});
+    // Pointer input is handled above; allow synthetic clicks from assistive technology.
+    listen(board,'click',e=>{if(suppressClick){suppressClick=false;return;}if(e.detail===0){const cell=e.target.closest('[data-cell]');if(cell)choose(Number(cell.dataset.cell));}});
+    listen(board,'keydown',e=>{
+      const offsets={ArrowLeft:-1,ArrowRight:1,ArrowUp:-N,ArrowDown:N};
+      if(busy && (e.key in offsets || e.key===' ' || e.key==='Enter')){e.preventDefault();return;}
+      if(e.key in offsets){e.preventDefault();const next=cursor+offsets[e.key];if(adjacent(cursor,next)){cursor=next;renderBoard();root.querySelector(`[data-cell="${cursor}"]`).focus({preventScroll:true});}}
+      else if(e.key===' ' || e.key==='Enter'){e.preventDefault();choose(cursor);}
+    });
+    listen(root,'click',e=>{
+      if(e.target.closest('[data-puzzle-restart]'))reset();
+      if(e.target.closest('[data-puzzle-hint]') && !busy){hint=model.legalMoves()[0]||[];selected=null;renderBoard();say('hintShown');}
+    });
+    renderBoard();updateHud();
   }
-  FB.puzzle={reset,mount,unmount,getState,createModel};
+  FB.puzzle={reset,mount,unmount,getState,createModel,matches,legalMoves,fruitSVG};
 })();

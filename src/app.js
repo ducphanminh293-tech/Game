@@ -83,7 +83,7 @@
       <div class="button-row"><button class="secondary-button" data-cost="${id}">${icon(b.status==='built'?'plus':'hammer')}${t(b.status==='built'?'building.upgrade':'building.build')}</button></div><p class="subtle-note">${t('building.productionNote')}</p></div></div>`;
   }
   function buildView() {
-    return `<p class="intro">${t('build.subtitle')}</p><div class="build-grid">${data.buildings.map(b=>`<button class="build-card" data-building="${b.id}"><img src="${art(b.id)}" alt=""><h3>${buildingName(b.id)}</h3><p>${t(`building.${b.id}.short`)}</p><span class="tag ${b.status==='available'?'gold':''}">${icon(b.status==='available'?'hammer':'check')}${t(`common.${b.status}`)}</span></button>`).join('')}</div><p class="subtle-note">${t('build.note')}</p>`;
+    return `<div class="studio-invitation"><div><span class="tag gold">${t('villageStudio.demo')}</span><h3>${t('villageStudio.title')}</h3><p>${t('villageStudio.help')}</p></div><button class="primary-button" data-open="studio">${icon('build')}${t('villageStudio.title')}</button></div><p class="intro">${t('build.subtitle')}</p><div class="build-grid">${data.buildings.map(b=>`<button class="build-card" data-building="${b.id}"><img src="${art(b.id)}" alt=""><h3>${buildingName(b.id)}</h3><p>${t(`building.${b.id}.short`)}</p><span class="tag ${b.status==='available'?'gold':''}">${icon(b.status==='available'?'hammer':'check')}${t(`common.${b.status}`)}</span></button>`).join('')}</div><p class="subtle-note">${t('build.note')}</p>`;
   }
   function charactersView() {
     return `<p class="intro">${t('characters.subtitle')}</p><div class="characters-grid">${data.characters.map(c=>{
@@ -94,8 +94,8 @@
     }).join('')}</div><p class="subtle-note">${t('assignment.note')}</p>`;
   }
   function playView() {
-    const fruits = ['apple','apple','grape','grape','grape','lime','lime','apple','apple','grape','empty','grape','lime','lime','apple','empty','grape','grape','grape','lime','lime','apple','apple','apple','empty','empty','lime','empty','empty','apple','empty','empty','empty','empty','empty'];
-    return `<div class="play-layout"><div class="stage-art" aria-label="${t('play.boardLabel')}"><span class="stage-label">${t('common.preview')}</span><div class="fruit-board" aria-hidden="true">${fruits.map(id=>`<span class="board-fruit ${id}">${icon(id==='lime'?'leaf':id)}</span>`).join('')}</div><div class="aim-dots"></div><div class="shooter">${icon('apple')}</div></div><div class="stage-copy"><span class="tag gold">${icon('flag')}${t('play.stage',{number:data.stage.number})}</span><h3>${t('play.title')}</h3><p>${t('play.instructions')}</p><div class="section-title">${t('play.objectives')} · ${t('play.shots',{amount:data.stage.shots})}</div><div class="objectives">${data.stage.goals.map(goal=>`<div class="objective ${goal.fruit}">${icon(goal.fruit)}<div><strong>${goal.amount}</strong><small>${t(`resource.${goal.fruit}`)}</small></div></div>`).join('')}</div><p class="subtle-note">${t('play.completeAll')}</p><div class="divider"></div><div class="section-title">${t('play.rewards')}</div><div class="rewards">${Object.entries(data.stage.rewards).map(([id,amount])=>`<div class="reward ${id}" title="${t(`resource.${id}`)}">${icon(id)}<strong>+${amount}</strong><span style="font-size:8px">${t(`resource.${id}`)}</span></div>`).join('')}</div><button class="primary-button" data-open="puzzle" style="width:100%;margin-top:18px">${icon('play')}${t('puzzle.playButton')}</button><p class="subtle-note">${t('play.balanceNote')}</p></div></div>`;
+    const fruits = FB.puzzle.createModel().snapshot().board;
+    return `<div class="play-layout"><div class="stage-art match-preview" aria-label="${t('play.boardLabel')}"><span class="stage-label">MATCH-3 · 6 × 6</span><div class="match-preview-grid" aria-hidden="true">${fruits.map(id=>`<span>${FB.puzzle.fruitSVG(id)}</span>`).join('')}</div></div><div class="stage-copy"><span class="tag gold">${icon('flag')}${t('play.stage',{number:data.stage.number})}</span><h3>${t('play.title')}</h3><p>${t('play.instructions')}</p><div class="section-title">${t('play.objectives')} · ${t('play.moves',{amount:data.stage.moves})}</div><div class="objectives">${data.stage.goals.map(goal=>`<div class="objective ${goal.fruit}">${icon(goal.fruit)}<div><strong>${goal.amount}</strong><small>${t(`resource.${goal.fruit}`)}</small></div></div>`).join('')}</div><p class="subtle-note">${t('play.completeAll')}</p><div class="divider"></div><div class="section-title">${t('play.rewards')}</div><div class="rewards">${Object.entries(data.stage.rewards).map(([id,amount])=>`<div class="reward ${id}" title="${t(`resource.${id}`)}">${icon(id)}<strong>+${amount}</strong><span style="font-size:8px">${t(`resource.${id}`)}</span></div>`).join('')}</div><button class="primary-button" data-open="puzzle" style="width:100%;margin-top:18px">${icon('play')}${t('puzzle.playButton')}</button><p class="subtle-note">${t('play.balanceNote')}</p></div></div>`;
   }
   function recruitView() {
     return `<div class="recruit-layout"><div class="recruit-art"><img src="${art('jasper')}" alt="${characterName('jasper')}"><img src="${art('rowan')}" alt="${characterName('rowan')}"><img src="${art('mira')}" alt="${characterName('mira')}"></div><div class="recruit-copy"><span class="tag gold">${icon('recruit')}${t('common.preview')}</span><h3>${t('recruit.title')}</h3><p>${t('recruit.subtitle')}</p><div class="ticket-balance">${icon('ticket')}<div><strong>${data.resources.find(r=>r.id==='ticket').amount}</strong><span>${t('recruit.tickets')}</span></div></div><button class="primary-button" data-open="characters">${icon('people')}${t('common.viewResidents')}</button><p class="subtle-note">${t('recruit.earn')}</p></div></div><p class="subtle-note">${t('recruit.undecided')}</p>`;
@@ -114,6 +114,7 @@
   }
   function renderModal(focus = false) {
     FB.puzzle?.unmount();
+    FB.village?.unmount();
     if (!state.modal) { $('#modal-root').innerHTML=''; return; }
     const previousScroll = $('.modal-body')?.scrollTop || 0;
     const {type,id} = state.modal;
@@ -122,6 +123,7 @@
       build:[t('build.title'),'build.eyebrow',buildView,'build.note','wide'],
       characters:[t('characters.title'),'characters.eyebrow',charactersView,'characters.statsNote','wide'],
       play:[t('nav.play'),'play.eyebrow',playView,'play.previewNote',''],
+      studio:[t('villageStudio.title'),'villageStudio.eyebrow',()=>'<div id="village-studio-mount"></div>','villageStudio.note','wide studio-modal'],
       puzzle:[t('puzzle.title'),'puzzle.eyebrow',()=>'<div id="puzzle-mount"></div>','puzzle.demoNote','wide puzzle-modal'],
       recruit:[t('nav.recruit'),'recruit.eyebrow',recruitView,'recruit.note',''],
       storage:[t('storage.title'),'storage.eyebrow',storageView,'storage.note',''],
@@ -135,6 +137,7 @@
     const [title,eyebrow,view,note,size] = config;
     $('#modal-root').innerHTML = `<div class="modal-backdrop"><section class="modal ${size}" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"><header class="modal-header"><div><div class="eyebrow">${t(eyebrow)}</div><h2 id="modal-title">${title}</h2></div><div class="modal-actions">${languageSwitch()}<button class="icon-button" data-close aria-label="${t('common.close')}">${icon('close')}</button></div></header><div class="modal-body">${view(id)}</div><footer class="modal-footer">${icon('info')}<span>${t(note)}</span></footer></section></div>`;
     if (type === 'puzzle') FB.puzzle.mount($('#puzzle-mount'),t);
+    if (type === 'studio') FB.village.mount($('#village-studio-mount'),t,state.language);
     $('.modal-body').scrollTop = focus ? 0 : previousScroll;
     if (focus) $('.modal').focus({preventScroll:true});
   }
@@ -190,7 +193,7 @@
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape' && state.modal)closeModal();
     if(event.key==='Tab' && state.modal){
-      const focusables=[...$('.modal').querySelectorAll('button:not(:disabled),[tabindex="0"]')].filter(el=>el.getClientRects().length);
+      const focusables=[...$('.modal').querySelectorAll('button:not(:disabled),input:not(:disabled),[tabindex="0"]')].filter(el=>el.getClientRects().length);
       const first=focusables[0],last=focusables[focusables.length-1];
       if(event.shiftKey&&(document.activeElement===first||document.activeElement===$('.modal'))){event.preventDefault();last?.focus();}
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}

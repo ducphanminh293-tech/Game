@@ -22,7 +22,7 @@ window.FB.data = {
   defaultAssignments: { orchard: 'mira', kitchen: 'jasper', workshop: null },
   stage: {
     number: 1,
-    shots: 18,
+    moves: 18,
     goals: [{ fruit: 'apple', amount: 12 }, { fruit: 'grape', amount: 9 }],
     rewards: { wood: 30, stone: 15, fruit: 20, ticket: 1 }
   }
